@@ -11,11 +11,6 @@ Pre-requisites/assumptions:
 - If you are behind a proxy you must have your settings properly configured so that docker can retrieve the official stash image (if you want to build the image from the Dockerfile)
 - Must have a database container properly configured with a user and a database for stash
 
-
-Build:
------
-- `sudo docker build -t stash_custom .`
-
 Usage:
 ------
 - Create a text file called plugins.txt which contains a list of plugins to install in the following format: <plugin name>:<plugin version>
@@ -24,7 +19,13 @@ Usage:
    - RSA_key.pub
    - plugins.txt
 
-- sudo docker run -d -p $http_port:7990 -p $ssh_port:7999 
+``` 
+sudo docker run -d -p <host http port>:7990 -p <host ssh port>:7999 \
+-v <path to your configuration directory in the host>:/var/stash/config \
+--link <name of database container>:<name of database container> \
+verigreen/stash
+```   
+
 - Wait a few seconds (about a minute or two should be more than enough)  for tomcat to initialize
   - You can also use the provided python program `test.py` to tell you when stash is ready to use.
 - Point your browser to localhost:5000 (or whatever port you defined as the stash http port)

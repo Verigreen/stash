@@ -32,4 +32,7 @@ db_driver: org.postgresql.Driver
 # Stash cloning parameters
 license: your_license_number_here
 server_id: your_server_id_here
+
+# Proxy
+proxy: your_proxy_here
 ...

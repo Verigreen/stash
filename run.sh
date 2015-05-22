@@ -34,11 +34,21 @@ db_name=`grep -m 1 "^db_name:" $yaml_file|awk '{print $2}'`
 db_user=`grep -m 1 "^db_user:" $yaml_file|awk '{print $2}'`
 db_password=`grep -m 1 "^db_password:" $yaml_file|awk '{print $2}'`
 hook_exe=`grep -m 1 "^hook_exe:" $yaml_file|awk '{print $2}'`
+proxy_url=`grep -m 1 "^proxy:" $yaml_file|awk '{print $2}'`
 
 # Start sendmail
 #not for now, might add it again in the future
 #/usr/sbin/service sendmail start
 
+# Set proxy settings
+if [[ -n $proxy_url ]]; then
+    export http_proxy=$proxy_url
+    export https_proxy=$proxy_url
+    export HTTP_PROXY=$proxy_url
+    export HTTPS_PROXY=$proxy_url
+    export no_proxy="127.0.0.1, localhost"    
+    export NO_PROXY="127.0.0.1, localhost"    
+fi
 
 # Create directory structure
 REF=/var/atlassian/application-data/stash/shared/plugins/installed-plugins
