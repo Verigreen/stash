@@ -83,8 +83,9 @@ chmod u+x $hooks_dir/*
 
 # Make sure the database exists
 python checkdb.py
-if [[ -z $? ]];then
-       
+result=$?
+
+if [[ $result -eq 0 ]];then
    # Start stash
    python stash_setup.py & >python.log
    eval "$1/bin/start-stash.sh -fg"

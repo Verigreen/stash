@@ -15,6 +15,7 @@ USER root
 RUN apt-get update -qq   \
     && apt-get install -y --no-install-recommends \
     sendmail python python-requests python-yaml   \
+    python-pygresql                               \
     && apt-get clean autoclean                    \
     && apt-get autoremove --yes                   \
     && rm -rf                  /var/lib/{apt,dpkg,cache,log}/
@@ -27,6 +28,7 @@ RUN mkdir -p /var/stash/plugins && mkdir -p /var/stash/config
 
 ADD run.sh run.sh
 ADD stash_setup.py stash_setup.py
+ADD checkdb.py checkdb.py
 
 # Run setup script
 CMD ./run.sh  $STASH_INSTALL_DIR

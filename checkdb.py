@@ -1,6 +1,7 @@
 import pg
 import sys
-
+import yaml
+import os
 try:
    config_file = os.environ['STASH_CONFIG_PATH'] + "/config.yml"
    with open(config_file,'r') as configuration_file:      
@@ -15,11 +16,11 @@ except Exception as e:
    print e
    sys.exit(-1)
 
-try:
-db = pg.db('postgres',config['db_container'],config['db_port'],None,None,
+try: 
+   db = pg.DB('postgres',config['db_container'],config['db_port'],None,None,
            config['db_user'],config['db_password'])
 except Exception as e:
-   print e
+   print "[ERROR]: Unable to connect to the database. Please check your credentials."
    sys.exit(-1)
 
 #if the stash database exists, then everything is ok, leave with status 0
@@ -34,6 +35,7 @@ else:
       query = 'create database ' + config['db_name']
       db.query(query)
       print "[OK]: Database successfully created"
+      sys.exit(0)      
    except Exception as e:
       print e
       sys.exit(-1)
