@@ -81,6 +81,13 @@ echo "jdbc.password=$db_password" >> $config_file
 cp $config_path_in_container/$hook_exe $hooks_dir
 chmod u+x $hooks_dir/*
 
-# Start stash
-python stash_setup.py & >python.log
-eval "$1/bin/start-stash.sh -fg"
+# Make sure the database exists
+python checkdb.py
+if [[ -z $? ]];then
+       
+   # Start stash
+   python stash_setup.py & >python.log
+   eval "$1/bin/start-stash.sh -fg"
+else
+   echo "[ERROR]: Unable to access/create database" 
+fi    
