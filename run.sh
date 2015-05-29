@@ -35,6 +35,7 @@ db_user=`grep -m 1 "^db_user:" $yaml_file|awk '{print $2}'`
 db_password=`grep -m 1 "^db_password:" $yaml_file|awk '{print $2}'`
 hook_exe=`grep -m 1 "^hook_exe:" $yaml_file|awk '{print $2}'`
 proxy_url=`grep -m 1 "^proxy:" $yaml_file|awk '{print $2}'`
+no_proxy=`grep -m 1 "^no_proxy:" $yaml_file|awk '{print $2}'`
 
 # Start sendmail
 #not for now, might add it again in the future
@@ -46,8 +47,14 @@ if [[ -n $proxy_url ]]; then
     export https_proxy=$proxy_url
     export HTTP_PROXY=$proxy_url
     export HTTPS_PROXY=$proxy_url
-    export no_proxy="127.0.0.1, localhost"    
-    export NO_PROXY="127.0.0.1, localhost"    
+
+    if [[ -n $no_proxy ]]; then
+       export no_proxy="$no_proxy"    
+       export NO_PROXY="$no_proxy" 
+    else   
+       export no_proxy="127.0.0.1, localhost"    
+       export NO_PROXY="127.0.0.1, localhost"         
+    fi   
 fi
 
 # Create directory structure
@@ -78,8 +85,10 @@ echo "jdbc.url=jdbc:$db_type://$db_container:$db_port/$db_name" >>$config_file
 echo "jdbc.user=$db_user" >> $config_file
 echo "jdbc.password=$db_password" >> $config_file
 
-cp $config_path_in_container/$hook_exe $hooks_dir
-chmod u+x $hooks_dir/*
+if [[ -n $hook_exe ]]; then
+   cp $config_path_in_container/$hook_exe $hooks_dir
+   chmod u+x $hooks_dir/*  
+fi
 
 # Make sure the database exists
 python checkdb.py

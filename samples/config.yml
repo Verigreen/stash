@@ -35,4 +35,5 @@ server_id: your_server_id_here
 
 # Proxy
 proxy: your_proxy_here
+no_proxy: your_no_proxy_here
 ...

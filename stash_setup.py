@@ -237,10 +237,12 @@ if success:
    # Applying browns law and sending a curl request for that page before setting everything up
    commander = rester(config)
    cmd = "curl -u " + commander.config['admin_user'] + ":" \
-           + commander.config['admin_password'] + " " + url + "/profile"
+           + commander.config['admin_password'] + " " + url + "/profile >/dev/null"
    os.system(cmd)
    commander.create_user()
    commander.set_ssh_key()
    commander.create_project()
-   commander.create_repo()   
-   commander.hook_setup()
+   commander.create_repo()  
+
+   if 'hook_id' in config: 
+      commander.hook_setup()
