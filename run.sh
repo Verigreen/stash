@@ -80,24 +80,32 @@ echo "setup.sysadmin.username=$admin_user" >> $config_file
 echo "setup.sysadmin.password=$admin_password" >> $config_file
 echo "setup.sysadmin.displayName=$admin_name" >> $config_file
 echo "setup.sysadmin.emailAddress=$admin_email" >>$config_file
-echo "jdbc.driver=$db_driver" >> $config_file
-echo "jdbc.url=jdbc:$db_type://$db_container:$db_port/$db_name" >>$config_file
-echo "jdbc.user=$db_user" >> $config_file
-echo "jdbc.password=$db_password" >> $config_file
+
+# Database parameters(all are needed in order to configure an external database)
+if [[ -n $db_type && -n $db_container && -n $db_port && -n $db_name ]]; then
+   echo "jdbc.driver=$db_driver" >> $config_file
+   echo "jdbc.url=jdbc:$db_type://$db_container:$db_port/$db_name" >>$config_file
+   echo "jdbc.user=$db_user" >> $config_file
+   echo "jdbc.password=$db_password" >> $config_file
+fi
 
 if [[ -n $hook_exe ]]; then
    cp $config_path_in_container/$hook_exe $hooks_dir
-   chmod u+x $hooks_dir/*  
+   chmod u+x $hooks_dir/*
 fi
 
-# Make sure the database exists
-python checkdb.py
-result=$?
+# Make sure the database exists, if configured to use an external database
+if [[ -n $db_type && -n $db_container && -n $db_port && -n $db_name ]]; then
+   python checkdb.py
+   result=$?
+else
+   result=0
+fi
 
 if [[ $result -eq 0 ]];then
    # Start stash
    python stash_setup.py & >python.log
    eval "$1/bin/start-stash.sh -fg"
 else
-   echo "[ERROR]: Unable to access/create database" 
-fi    
+   echo "[ERROR]: Unable to access/create database"
+fi
