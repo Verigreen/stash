@@ -34,6 +34,7 @@ license: your_license_number_here
 server_id: your_server_id_here
 
 # Proxy
-proxy: your_proxy_here
+http_proxy: your_http_proxy_here
+https_proxy: your https_proxy_here
 no_proxy: your_no_proxy_here
 ...

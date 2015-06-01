@@ -34,7 +34,8 @@ db_name=`grep -m 1 "^db_name:" $yaml_file|awk '{print $2}'`
 db_user=`grep -m 1 "^db_user:" $yaml_file|awk '{print $2}'`
 db_password=`grep -m 1 "^db_password:" $yaml_file|awk '{print $2}'`
 hook_exe=`grep -m 1 "^hook_exe:" $yaml_file|awk '{print $2}'`
-proxy_url=`grep -m 1 "^proxy:" $yaml_file|awk '{print $2}'`
+http_proxy=`grep -m 1 "^http_proxy:" $yaml_file|awk '{print $2}'`
+https_proxy=`grep -m 1 "^https_proxy:" $yaml_file|awk '{print $2}'`
 no_proxy=`grep -m 1 "^no_proxy:" $yaml_file|awk '{print $2}'`
 
 # Start sendmail
@@ -42,11 +43,21 @@ no_proxy=`grep -m 1 "^no_proxy:" $yaml_file|awk '{print $2}'`
 #/usr/sbin/service sendmail start
 
 # Set proxy settings
-if [[ -n $proxy_url ]]; then
-    export http_proxy=$proxy_url
-    export https_proxy=$proxy_url
-    export HTTP_PROXY=$proxy_url
-    export HTTPS_PROXY=$proxy_url
+if [[ -n $http_proxy || -n $https_proxy ]]; then
+    if [[ -n $http_proxy ]]; then
+       export http_proxy=$http_proxy
+       export HTTP_PROXY=$http_proxy
+    else
+       export http_proxy=$https_proxy
+       export HTTP_PROXY=$https_proxy
+    fi
+    if [[ -n $https_proxy ]]; then
+       export https_proxy=$https_proxy
+       export HTTPS_PROXY=$https_proxy      
+    else   
+       export https_proxy=$http_proxy
+       export HTTPS_PROXY=$http_proxy      
+    fi
 
     if [[ -n $no_proxy ]]; then
        export no_proxy="$no_proxy"    
