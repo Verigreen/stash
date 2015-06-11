@@ -16,23 +16,7 @@ if [[ ! -e "$yaml_file" ]]; then
 fi
 
 # Read values from yaml file
-http_port=`grep -m 1 "^http_port:" $yaml_file|awk '{print $2}'`
-license=`grep -m 1 "^license:" $yaml_file|awk '{print $2}'`
-server_id=`grep -m 1 "^server_id:" $yaml_file|awk '{print $2}'`
-admin_user=`grep -m 1 "^admin_user:" $yaml_file|awk '{print $2}'`
-admin_password=`grep -m 1 "^admin_password:" $yaml_file|awk '{print $2}'`
-admin_name=`grep -m 1 "^admin_name:" $yaml_file|awk -F ": " '{print $2}'`
-admin_email=`grep -m 1 "^admin_email:" $yaml_file|awk '{print $2}'`
 
-system_name=`grep -m 1 "^system_name:" $yaml_file|awk '{print $2}'`
-
-db_driver=`grep -m 1 "^db_driver:" $yaml_file|awk '{print $2}'`
-db_type=`grep -m 1 "^db_type:" $yaml_file|awk '{print $2}'`
-db_container=`grep -m 1 "^db_container:" $yaml_file|awk '{print $2}'`
-db_port=`grep -m 1 "^db_port:" $yaml_file|awk '{print $2}'`
-db_name=`grep -m 1 "^db_name:" $yaml_file|awk '{print $2}'`
-db_user=`grep -m 1 "^db_user:" $yaml_file|awk '{print $2}'`
-db_password=`grep -m 1 "^db_password:" $yaml_file|awk '{print $2}'`
 hook_exe=`grep -m 1 "^hook_exe:" $yaml_file|awk '{print $2}'`
 http_proxy=`grep -m 1 "^http_proxy:" $yaml_file|awk '{print $2}'`
 https_proxy=`grep -m 1 "^https_proxy:" $yaml_file|awk '{print $2}'`
@@ -81,37 +65,14 @@ while read spec; do
     curl -L $URL/${plugin[0]}/version/${plugin[1]} -o $REF/${plugin[0]}.jar;
 done  < $config_path_in_container/plugins.txt
 
-# Create .properties file
-
-echo "setup.displayName=$system_name" >> $config_file
-echo "setup.baseUrl=localhost:$http_port" >> $config_file
-echo "setup.license=$license">> $config_file
-echo "setup.server.id=$server_id" >> $config_file
-echo "setup.sysadmin.username=$admin_user" >> $config_file
-echo "setup.sysadmin.password=$admin_password" >> $config_file
-echo "setup.sysadmin.displayName=$admin_name" >> $config_file
-echo "setup.sysadmin.emailAddress=$admin_email" >>$config_file
-
-# Database parameters(all are needed in order to configure an external database)
-if [[ -n $db_type && -n $db_container && -n $db_port && -n $db_name ]]; then
-   echo "jdbc.driver=$db_driver" >> $config_file
-   echo "jdbc.url=jdbc:$db_type://$db_container:$db_port/$db_name" >>$config_file
-   echo "jdbc.user=$db_user" >> $config_file
-   echo "jdbc.password=$db_password" >> $config_file
-fi
-
 if [[ -n $hook_exe ]]; then
    cp $config_path_in_container/$hook_exe $hooks_dir
    chmod u+x $hooks_dir/*
 fi
 
 # Make sure the database exists, if configured to use an external database
-if [[ -n $db_type && -n $db_container && -n $db_port && -n $db_name ]]; then
-   python checkdb.py
-   result=$?
-else
-   result=0
-fi
+python checkdb.py
+result=$?
 
 if [[ $result -eq 0 ]];then
    # Start stash
