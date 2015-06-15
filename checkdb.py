@@ -28,14 +28,13 @@ except Exception as e:
 
 # Check mandatory fields
 wanted_keys = ['admin_user','admin_password','admin_name','admin_email',
-               'stash_user','stash_password','stash_name','stash_email',
-               'system_name',
-               'RSA_file','host',
-               'proj_key','proj_name','proj_desc','repo_name',
+               'system_name','host',
                'http_port','ssh_port','plugins_dir',
-               #'db_type',
-               'db_user','db_password','db_container','db_port',
-               'db_name','server_id','license']
+               'server_id','license']
+if 'db_type' in config:
+   wanted_keys.extend(['db_user','db_password','db_container','db_port','db_name'])
+   if 'oracle' == config['db_type']:
+      wanted_keys.append('SID')
 #must add collector_address for verigreen hook version
 missing_keys = []
 
@@ -44,15 +43,15 @@ for key in wanted_keys:
       missing_keys.append(key)
 
 if missing_keys:
-   print "The following variables were not set in the configuration file:\a"
+   print "[ERROR]: The following variables were not set in the configuration file:\a"
    for key in missing_keys:
       print key
-   print "please correct the configuration file and try again"
+   print "Please correct the configuration file and try again."
    sys.exit(-1)
 else:
    print "The configuration file contains all needed variables"
-# Print all the optional keys that were set but didnt have a value
 
+# Print all the optional keys that were set but didnt have a value
 
 # Create the properties file
 
@@ -91,7 +90,7 @@ with open(config['stash_home']+"/shared/stash-config.properties",'w') as f:
    f.close()
 
 if not('db_type' in config):
-   print "using internal database"
+   print "[INFO]: No database specified, using internal database."
    sys.exit(0)
 
 
@@ -133,5 +132,3 @@ if 'postgresql' == config['db_type']:
       except Exception as e:
          print e
          sys.exit(-1)
-
-

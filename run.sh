@@ -5,7 +5,7 @@
 
 # Set the required paths
 config_path_in_container='/var/stash/config'
-stash_home='/var/atlassian/application-data/stash'
+stash_home='/var/atlassian/application-data/stash' 
 config_file="$stash_home/shared/stash-config.properties"
 yaml_file='/var/stash/config/config.yml'
 hooks_dir="$stash_home/external-hooks"
@@ -53,7 +53,7 @@ if [[ -n $http_proxy || -n $https_proxy ]]; then
 fi
 
 # Create directory structure
-REF=/var/atlassian/application-data/stash/shared/plugins/installed-plugins
+REF=$stash_home/shared/plugins/installed-plugins
 mkdir -p $REF
 mkdir -p $hooks_dir
 

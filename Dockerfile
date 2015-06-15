@@ -29,8 +29,7 @@ RUN apt-get update -qq   \
 # SSH Port  7999 exposed in base image
 
 # Create directories for volume mounting and defaults
-RUN mkdir -p /var/stash/plugins && mkdir -p /var/stash/config
-
+RUN mkdir -p /var/stash/plugins && mkdir -p /var/stash/config 
 
 ADD run.sh run.sh
 ADD stash_setup.py stash_setup.py
