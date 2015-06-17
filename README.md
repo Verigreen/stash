@@ -42,7 +42,7 @@ The configuration contains the following fields:
    * admin_email: 
 
 * ### Stash settings
-   * system_name: VG_on_Stash
+   * system_name: The displayed name of this stash server. This is the same server name that appears in the login page.
     
 * ### Database parameters
   If the database type is specified then you need to specify the other database parameters. Otherwise the internal database is used.
