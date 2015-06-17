@@ -32,7 +32,7 @@ wanted_keys = ['admin_user','admin_password','admin_name','admin_email',
                'http_port','ssh_port','plugins_dir',
                'server_id','license']
 if 'db_type' in config:
-   wanted_keys.extend(['db_user','db_password','db_container','db_port','db_name'])
+   wanted_keys.extend(['db_user','db_password','db_host','db_port','db_name'])
    if 'oracle' == config['db_type']:
       wanted_keys.append('SID')
 #must add collector_address for verigreen hook version
@@ -64,7 +64,7 @@ with open(config['stash_home']+"/shared/stash-config.properties",'w') as f:
    f.write("setup.sysadmin.password="+str(config['admin_password'])+"\n")
    f.write("setup.sysadmin.displayName="+str(config['admin_name'])+"\n")
    f.write("setup.sysadmin.emailAddress="+str(config['admin_email'])+"\n")
-   if 'db_type' in config and 'db_container' in config \
+   if 'db_type' in config and 'db_host' in config \
       and 'db_port' in config and 'db_name' in config:
 
       if not config['db_type'] in ("postgresql","oracle"):
@@ -78,10 +78,10 @@ with open(config['stash_home']+"/shared/stash-config.properties",'w') as f:
          f.write("jdbc.driver="+postgres_driver+"\n")
 
       if "postgresql" == config['db_type']:
-         f.write("jdbc.url=jdbc:postgresql://"+str(config['db_container']) \
+         f.write("jdbc.url=jdbc:postgresql://"+str(config['db_host']) \
                  +":"+str(config['db_port'])+"/"+str(config['db_name'])+"\n")
       if "oracle" == config['db_type']:
-         line = "jdbc.url=jdbc:oracle:thin:@"+str(config['db_container']) \
+         line = "jdbc.url=jdbc:oracle:thin:@"+str(config['db_host']) \
                  +":"+str(config['db_port'])+":"+str(config['SID'])+"\n"
          f.write(line)
 
@@ -98,7 +98,7 @@ try:
 
    if config['db_type']  == "postgresql":
       print "connecting to postgres"
-      db = pg.DB('postgres',config['db_container'],config['db_port'],None,None,
+      db = pg.DB('postgres',config['db_host'],config['db_port'],None,None,
               config['db_user'],config['db_password'])
 
    if config['db_type'] == "oracle" and oracle_module:
@@ -107,7 +107,7 @@ try:
       # database(oracle schema) exists
 
 
-      dsn = cx_Oracle.makedsn(config['db_container'],config['db_port'],config['SID'])
+      dsn = cx_Oracle.makedsn(config['db_host'],config['db_port'],config['SID'])
       connection = cx_Oracle.connect(config['db_user'],config['db_password'],dsn)   
 
 except Exception as e:

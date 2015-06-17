@@ -96,7 +96,10 @@ class rester:
       else:   
          print "Unable to create repository: " \
               + r.json()["errors"][0]["message"]              
-
+      if 'hook_id' in config: 
+      #block for now, maybe move it to repository configuration?
+         self.hook_setup(repository,project_key,user_auth)
+   
    def create_user(self,user):          
       # First create the user then set them as project creator
       #command = 'admin/users'
@@ -164,9 +167,9 @@ class rester:
       if 'RSA_key' in user:
          self.set_ssh_key(user['RSA_key'],user_auth)
 
-   def hook_setup(self):           
-      command = 'projects/' + self.config['proj_key'] + '/repos/' \
-                            + self.config['repo_name'] + '/settings/hooks/' \
+   def hook_setup(self,repository,project_key,user_auth):           
+      command = 'projects/' + project_key + '/repos/' \
+                            + repository['name'] + '/settings/hooks/' \
                             + self.config['hook_id'] +'/settings'
       
       req = self.host_api + command
@@ -177,13 +180,13 @@ class rester:
          "params":""
       }
       try:
-         r = requests.put( req,data=json.dumps(params),headers=self.headers,auth=self.stash_auth)
+         r = requests.put( req,data=json.dumps(params),headers=self.headers,auth=user_auth)
          if r.status_code ==200:
             print "Pre-receive hook successfull configured"   
             if self.config['hook_enable']:
-               command = 'projects/' + self.config['proj_key'] + '/repos/' \
-                                     + self.config['repo_name'] + '/settings/hooks/' \
-                                     + self.config['hook_id'] +'/enabled'
+#               command = 'projects/' + self.config['proj_key'] + '/repos/' \
+ #                                    + self.config['repo_name'] + '/settings/hooks/' \
+  #                                   + self.config['hook_id'] +'/enabled'
                req = self.host_api + command
                params = {
                    "enabled":"true",
@@ -194,7 +197,7 @@ class rester:
                }
 
                try:
-                  r = requests.put(req,data=json.dumps(params),headers=self.headers,auth=self.stash_auth)
+                  r = requests.put(req,data=json.dumps(params),headers=self.headers,auth=user_auth)
                   if r.status_code ==200:
                      print "Pre-receive hook successfully enabled" 
                   else:
@@ -225,11 +228,15 @@ except Exception as e:
    sys.exit()
 
 url = "http://" + config['host'] +":"+config['stash_port']
-limit = 300 #5 minute timeout
+limit = 600 #10 minute timeout by default
+if 'timeout' in config and type (config['timeout']) == int:
+   limit = config['timeout']
+
 total_time =0
 wait_time = 10
 success = False
 preg = re.compile('/projects\Z')
+
 while total_time < limit:
    try:
       r = requests.get(url)   
@@ -255,7 +262,7 @@ if success:
    for user in config['users']:
       commander.create_user(user)
 
-   if 'hook_id' in config: 
-      commander.hook_setup()
-      
+     
    print "Setup complete"   
+else:
+   print "[INFO]: Timeout expired, gave trying to setup stash."   
