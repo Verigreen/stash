@@ -184,9 +184,9 @@ class rester:
          if r.status_code ==200:
             print "Pre-receive hook successfull configured"   
             if self.config['hook_enable']:
-#               command = 'projects/' + self.config['proj_key'] + '/repos/' \
- #                                    + self.config['repo_name'] + '/settings/hooks/' \
-  #                                   + self.config['hook_id'] +'/enabled'
+               command = 'projects/' + project_key + '/repos/' \
+                                     + repository['name'] + '/settings/hooks/' \
+                                     + self.config['hook_id'] +'/enabled'
                req = self.host_api + command
                params = {
                    "enabled":"true",
@@ -197,9 +197,11 @@ class rester:
                }
 
                try:
+                  print json.dumps(params)
                   r = requests.put(req,data=json.dumps(params),headers=self.headers,auth=user_auth)
                   if r.status_code ==200:
                      print "Pre-receive hook successfully enabled" 
+                     print r.text
                   else:
                      print "Unable to enable pre-receive hook: " \
                          + r.json()["errors"][0]["message"]

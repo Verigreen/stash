@@ -17,7 +17,9 @@ fi
 
 # Read values from yaml file
 
-hook_exe=`grep -m 1 "^hook_exe:" $yaml_file|awk '{print $2}'`
+if [[ -z "$hook_exe" ]];then
+   hook_exe=`grep -m 1 "^hook_exe:" $yaml_file|awk '{print $2}'`
+fi
 http_proxy=`grep -m 1 "^http_proxy:" $yaml_file|awk '{print $2}'`
 https_proxy=`grep -m 1 "^https_proxy:" $yaml_file|awk '{print $2}'`
 no_proxy=`grep -m 1 "^no_proxy:" $yaml_file|awk '{print $2}'`
@@ -57,6 +59,11 @@ REF=$stash_home/shared/plugins/installed-plugins
 mkdir -p $REF
 mkdir -p $hooks_dir
 
+#external hooks
+if [[ -n $hook_exe ]]; then
+      cp $config_path_in_container/$hook_exe $hooks_dir
+fi
+
 URL="https://marketplace.atlassian.com/download/plugins"
 if [[ -e $config_path_in_container/plugins.txt ]];then
    while read spec; do
@@ -66,10 +73,7 @@ if [[ -e $config_path_in_container/plugins.txt ]];then
       curl -L $URL/${plugin[0]}/version/${plugin[1]} -o $REF/${plugin[0]}.jar;
    done  < $config_path_in_container/plugins.txt
 
-   if [[ -n $hook_exe ]]; then
-      cp $config_path_in_container/$hook_exe $hooks_dir
-      chmod u+x $hooks_dir/*
-   fi
+   chmod u+x $hooks_dir/*
 fi
 
 # Make sure the database exists, if configured to use an external database
