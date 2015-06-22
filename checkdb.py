@@ -35,7 +35,7 @@ if 'db_type' in config:
    wanted_keys.extend(['db_user','db_password','db_host','db_port','db_name'])
    if 'oracle' == config['db_type']:
       wanted_keys.append('SID')
-#must add collector_address for verigreen hook version
+
 missing_keys = []
 
 for key in wanted_keys:

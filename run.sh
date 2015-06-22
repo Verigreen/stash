@@ -17,9 +17,7 @@ fi
 
 # Read values from yaml file
 
-if [[ -z "$hook_exe" ]];then
-   hook_exe=`grep -m 1 "^hook_exe:" $yaml_file|awk '{print $2}'`
-fi
+hook_exe=`grep -m 1 "^hook_exe:" $yaml_file|awk '{print $2}'`
 http_proxy=`grep -m 1 "^http_proxy:" $yaml_file|awk '{print $2}'`
 https_proxy=`grep -m 1 "^https_proxy:" $yaml_file|awk '{print $2}'`
 no_proxy=`grep -m 1 "^no_proxy:" $yaml_file|awk '{print $2}'`
