@@ -18,8 +18,8 @@ class rester:
       
       self.http_host = self.config['host'] + ':' + self.config['stash_port']
       self.ssh_host = self.config['host'] + ':' + self.config['stash_git_port']
-      self.admin_auth = requests.auth.HTTPBasicAuth(self.config['admin_user'],
-                                              self.config['admin_password'])
+      self.admin_auth = requests.auth.HTTPBasicAuth(self.config['admin']['username'],
+                                              self.config['admin']['password'])
 
       self.headers = {'content-type': 'application/json'}
       self.host_api='http://' + self.http_host + '/rest/api/1.0/'
@@ -48,7 +48,7 @@ class rester:
          print "Unable to transfer RSA key: " \
               + r.json()["errors"][0]["message"]              
 
-   def create_project(self,project,user_auth):
+   def create_project(self,project):
       command = 'projects'
       req = self.host_api + command
       proj = {
@@ -61,7 +61,7 @@ class rester:
                   req,
                   data = json.dumps(proj),
                   headers = self.headers,
-                  auth = user_auth)
+                  auth = self.admin_auth)
       except Exception as e:
          print "Error creating project: " + e
 
@@ -73,9 +73,9 @@ class rester:
 
       # Create related repositories
       for repository in project['repositories']:
-         self.create_repo(repository,project['key'],user_auth)
+         self.create_repo(repository,project['key'])
 
-   def create_repo(self,repository,project_key,user_auth):
+   def create_repo(self,repository,project_key):
       command = 'projects/' + project_key + '/repos'
       req = self.host_api + command
       repo = {
@@ -88,18 +88,56 @@ class rester:
                   req,
                   data = json.dumps(repo),
                   headers = self.headers,
-                  auth = user_auth)    
+                  auth = self.admin_auth)    
       except Exception as e:
          print "Error creating repository: " + e
       if r.status_code == 201:
          print "Repository " + str(repository['name']) + " successfully created"
       else:   
          print "Unable to create repository: " \
-              + r.json()["errors"][0]["message"]              
-      if 'hook_id' in config: 
+              + r.json()["errors"][0]["message"]
+                            
+      if 'hook_id' in config and 'hook_exe' in config: 
       #block for now, maybe move it to repository configuration?
-         self.hook_setup(repository,project_key,user_auth)
+         self.hook_setup(repository,project_key)
+      #set permissions:
+      for permission in repository['permissions']:
+
+          if "read" == permission['access']:
+             access ="REPO_READ"
+          if "write" == permission['access']:
+             access ="REPO_WRITE"
+          if "admin" == permission['access']:
+             access ="REPO_ADMIN"
+
+         
+          command = 'projects/' + project_key + '/repos/' + repository['name'] + \
+          '/permissions/users?name='+permission['username']+"&permission="+access
+
+          req = self.host_api + command
    
+          # perm = {
+          #      'name': permission['username'],
+          #      'permission': access
+          # }
+          #print perm
+          try: 
+             r = requests.put(
+                  req,
+                  #data = json.dumps(perm),
+                  headers = self.headers,
+                  auth = self.admin_auth)    
+          except Exception as e:
+             print "Error setting permissions: " + e
+
+          if r.status_code == 204:
+             print "Successfully set permissions for " + permission['username'] \
+             +" to repository "+ repository['name'] 
+          else:   
+             print "Unable to set permissions: " \
+             + r.json()["errors"][0]["message"]              
+             
+
    def create_user(self,user):          
       # First create the user then set them as project creator
       #command = 'admin/users'
@@ -160,14 +198,14 @@ class rester:
       user_auth = requests.auth.HTTPBasicAuth(user['username'], user['password'])
 
       # Create any projects for the current user      
-      for project in user['projects']:
-         self.create_project(project,user_auth)
+      #for project in user['projects']:
+       #  self.create_project(project,user_auth)
 
       # Set ssh key
-      if 'RSA_key' in user:
-         self.set_ssh_key(user['RSA_key'],user_auth)
+      if 'ssh_key' in user:
+         self.set_ssh_key(user['ssh_key'],user_auth)
 
-   def hook_setup(self,repository,project_key,user_auth):           
+   def hook_setup(self,repository,project_key):           
       command = 'projects/' + project_key + '/repos/' \
                             + repository['name'] + '/settings/hooks/' \
                             + self.config['hook_id'] +'/settings'
@@ -180,7 +218,7 @@ class rester:
          "params":""
       }
       try:
-         r = requests.put( req,data=json.dumps(params),headers=self.headers,auth=user_auth)
+         r = requests.put( req,data=json.dumps(params),headers=self.headers,auth=self.admin_auth)
          if r.status_code ==200:
             print "Pre-receive hook successfull configured"   
             if self.config['hook_enable']:
@@ -197,7 +235,7 @@ class rester:
                }
 
                try:
-                  r = requests.put(req,data=json.dumps(params),headers=self.headers,auth=user_auth)
+                  r = requests.put(req,data=json.dumps(params),headers=self.headers,auth=self.admin_auth)
                   if r.status_code ==200:
                      print "Pre-receive hook successfully enabled" 
                   else:
@@ -222,6 +260,7 @@ try:
       config['host'] = os.environ['STASH_HOST']
       config['stash_port'] = os.environ['STASH_PORT']
       config['stash_git_port'] = os.environ['STASH_GIT_PORT']
+      config['hook_id'] = "com.ngs.stash.externalhooks.external-hooks%3Aexternal-pre-receive-hook"
 except Exception as e:
 # If the config file cannot be imported as a dictionary, bail!
    print e
@@ -256,12 +295,14 @@ if success:
    # Not sure why the admin account has no admin powers until you click on "view my profile"
    # Applying browns law and sending a curl request for that page before setting everything up
    commander = rester(config)
-   cmd = "curl -u " + commander.config['admin_user'] + ":" \
-           + commander.config['admin_password'] + " " + url + "/profile >/dev/null"
+   cmd = "curl -u " + commander.config['admin']['username'] + ":" \
+           + commander.config['admin']['password'] + " " + url + "/profile >/dev/null"
    os.system(cmd)
    for user in config['users']:
       commander.create_user(user)
 
+   for project in config['projects']:
+      commander.create_project(project)
      
    print "Setup complete"   
 else:

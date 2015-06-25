@@ -60,18 +60,7 @@ mkdir -p $hooks_dir
 #external hooks
 if [[ -n $hook_exe ]]; then
       cp $config_path_in_container/$hook_exe $hooks_dir
-fi
-
-URL="https://marketplace.atlassian.com/download/plugins"
-if [[ -e $config_path_in_container/plugins.txt ]];then
-   while read spec; do
-      plugin=(${spec//:/ }); 
-      [[ ${plugin[0]} =~ ^# ]] && continue
-      [[ ${plugin[0]} =~ ^\s*$ ]] && continue
-      curl -L $URL/${plugin[0]}/version/${plugin[1]} -o $REF/${plugin[0]}.jar;
-   done  < $config_path_in_container/plugins.txt
-
-   chmod u+x $hooks_dir/*
+      chmod u+x $hooks_dir/*
 fi
 
 # Make sure the database exists, if configured to use an external database

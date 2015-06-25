@@ -27,9 +27,8 @@ except Exception as e:
    sys.exit(-1)
 
 # Check mandatory fields
-wanted_keys = ['admin_user','admin_password','admin_name','admin_email',
-               'system_name','host',
-               'http_port','ssh_port','plugins_dir',
+wanted_keys = ['admin', 'system_name', 'host', 'http_port','ssh_port',
+               #'plugins_dir', #this is optional
                'server_id','license']
 if 'db_type' in config:
    wanted_keys.extend(['db_user','db_password','db_host','db_port','db_name'])
@@ -53,17 +52,27 @@ else:
 
 # Print all the optional keys that were set but didnt have a value
 
-# Create the properties file
+# Install plugins
+if 'plugins' in config:
+   print "got plugins"
+   for plugin in config['plugins']:
+      print "installing "+plugin['name']
+      cmd = "curl -L https://marketplace.atlassian.com/download/plugins/" \
+          +plugin['name']+"/version/"+str(plugin['version'])+" -o " \
+          +config['stash_home']+"/shared/plugins/installed-plugins/" \
+          +plugin['name']+".jar"
+      os.system(cmd)    
 
+# Create the properties file
 with open(config['stash_home']+"/shared/stash-config.properties",'w') as f:
    f.write("setup.displayName="+str(config['system_name'])+"\n")
    f.write("setup.baseUrl=localhost:"+str(config['http_port'])+"\n")
    f.write("setup.license="+str(config['license'])+"\n")
    f.write("setup.server.id="+str(config['server_id'])+"\n")
-   f.write("setup.sysadmin.username="+str(config['admin_user'])+"\n")
-   f.write("setup.sysadmin.password="+str(config['admin_password'])+"\n")
-   f.write("setup.sysadmin.displayName="+str(config['admin_name'])+"\n")
-   f.write("setup.sysadmin.emailAddress="+str(config['admin_email'])+"\n")
+   f.write("setup.sysadmin.username="+str(config['admin']['username'])+"\n")
+   f.write("setup.sysadmin.password="+str(config['admin']['password'])+"\n")
+   f.write("setup.sysadmin.displayName="+str(config['admin']['name'])+"\n")
+   f.write("setup.sysadmin.emailAddress="+str(config['admin']['email'])+"\n")
    if 'db_type' in config and 'db_host' in config \
       and 'db_port' in config and 'db_name' in config:
 
