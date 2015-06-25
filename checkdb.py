@@ -28,7 +28,6 @@ except Exception as e:
 
 # Check mandatory fields
 wanted_keys = ['admin', 'system_name', 'host', 'http_port','ssh_port',
-               #'plugins_dir', #this is optional
                'server_id','license']
 if 'db_type' in config:
    wanted_keys.extend(['db_user','db_password','db_host','db_port','db_name'])
