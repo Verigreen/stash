@@ -53,7 +53,7 @@ else:
 
 # Install plugins
 if 'plugins' in config:
-   print "got plugins"
+   print "Installing plugins"
    for plugin in config['plugins']:
       print "installing "+plugin['name']
       cmd = "curl -L https://marketplace.atlassian.com/download/plugins/" \

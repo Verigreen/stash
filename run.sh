@@ -18,38 +18,45 @@ fi
 # Read values from yaml file
 
 hook_exe=`grep -m 1 "^hook_exe:" $yaml_file|awk '{print $2}'`
-http_proxy=`grep -m 1 "^http_proxy:" $yaml_file|awk '{print $2}'`
-https_proxy=`grep -m 1 "^https_proxy:" $yaml_file|awk '{print $2}'`
-no_proxy=`grep -m 1 "^no_proxy:" $yaml_file|awk '{print $2}'`
+config_http_proxy=`grep -m 1 "^http_proxy:" $yaml_file|awk '{print $2}'`
+config_https_proxy=`grep -m 1 "^https_proxy:" $yaml_file|awk '{print $2}'`
+config_no_proxy=`grep -m 1 "^no_proxy:" $yaml_file|awk '{print $2}'`
 
 # Start sendmail
 #not for now, might add it again in the future
 #/usr/sbin/service sendmail start
 
 # Set proxy settings
-if [[ -n $http_proxy || -n $https_proxy ]]; then
-    if [[ -n $http_proxy ]]; then
-       export http_proxy=$http_proxy
-       export HTTP_PROXY=$http_proxy
+if [[ -n $config_http_proxy || -n $config_https_proxy ]]; then
+    if [[ -n $config_http_proxy ]]; then
+       export http_proxy=$config_http_proxy
+       export HTTP_PROXY=$config_http_proxy
     else
-       export http_proxy=$https_proxy
-       export HTTP_PROXY=$https_proxy
+       export http_proxy=$config_https_proxy
+       export HTTP_PROXY=$config_https_proxy
     fi
-    if [[ -n $https_proxy ]]; then
-       export https_proxy=$https_proxy
-       export HTTPS_PROXY=$https_proxy      
-    else   
-       export https_proxy=$http_proxy
-       export HTTPS_PROXY=$http_proxy      
+    if [[ -n $config_https_proxy ]]; then
+       export https_proxy=$config_https_proxy
+       export HTTPS_PROXY=$config_https_proxy
+    else
+       export https_proxy=$config_http_proxy
+       export HTTPS_PROXY=$config_http_proxy
     fi
 
-    if [[ -n $no_proxy ]]; then
-       export no_proxy="$no_proxy"    
-       export NO_PROXY="$no_proxy" 
-    else   
-       export no_proxy="127.0.0.1, localhost"    
-       export NO_PROXY="127.0.0.1, localhost"         
-    fi   
+    if [[ -n $config_no_proxy ]]; then
+       if [[ -n $no_proxy ]]; then
+          export no_proxy="$no_proxy, $config_no_proxy"
+          export NO_PROXY="$NO_PROXY,$config_no_proxy"
+       else
+          export no_proxy="$config_no_proxy"
+          export NO_PROXY="$config_no_proxy"
+       fi
+    else
+       if [[ -z $no_proxy ]]; then
+          export no_proxy="127.0.0.1, localhost"
+          export NO_PROXY="127.0.0.1, localhost"
+       fi
+    fi
 fi
 
 # Create directory structure
