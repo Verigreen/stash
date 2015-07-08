@@ -1,0 +1,2 @@
+com.ngs.stash.externalhooks.external-hooks:161
+com.risingoak.stash.plugins.stash-enforce-author-hook:14

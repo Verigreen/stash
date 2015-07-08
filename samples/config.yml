@@ -1,0 +1,52 @@
+---
+# Stash administrator
+admin_user: admin    
+admin_password: password 
+admin_name: Stash admin(automatic)
+admin_email: admin_email@yourcompany.com
+
+# Stash settings
+system_name: Stash_sytem_1
+
+# Stash regular user(for pushing code)
+users:
+   - username: stash_user
+     password: stash_password
+     name: Stash User
+     email: stash_user@yourcompany.com
+     projects:
+        # Project and repository information
+        - key: vg_test_project_1
+          name: Verigreen Test Project
+          desc: Project created to demonstrate Verigreen+Stash integration.
+          repositories:
+             - name: repository_1
+        - key: vg_test_project_2
+          name: Second Verigreen Test Project
+          desc: This is the second project for this user
+          repositories:
+             - name: repository_2
+             - name: repository_3
+
+# Database parameters
+db_user: stash_user
+db_password: password
+db_type: postgresql
+db_host: postgres
+db_port: 5432
+db_name: stash
+
+# Stash cloning parameters
+license: your_license_number_here
+server_id: your_server_id_here
+
+# Host-container interface parameters
+http_port: 5000
+ssh_port: 5001
+plugins_dir: directory_where_you_have_pre_downloaded_plugins
+
+# Proxy
+http_proxy: your_http_proxy_here
+https_proxy: your https_proxy_here
+no_proxy: your_no_proxy_here
+...
